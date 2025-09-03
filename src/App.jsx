@@ -7,12 +7,12 @@ export default function PatientForm() {
   const [cameraOn, setCameraOn] = useState(false);
   const [stream, setStream] = useState(null);
   const [facingMode, setFacingMode] = useState("user");
-   const [zoomLevel, setZoomLevel] = useState(1);
+  const [zoomLevel, setZoomLevel] = useState(1);
 
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const fileInputRef = useRef(null);
-  const initialDistanceRef = useRef(null)
+  const initialDistanceRef = useRef(null);
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
@@ -50,7 +50,7 @@ export default function PatientForm() {
     }
   }, [stream]);
 
-    useEffect(() => {
+  useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
 
@@ -85,8 +85,10 @@ export default function PatientForm() {
             console.warn("Zoom not supported:", err);
           }
         } else {
-          // fallback: CSS scale (agar hardware zoom supported na ho)
+          // fallback: CSS scale (video content only)
           video.style.transform = `scale(${newZoom})`;
+          video.style.transformOrigin = "center center";
+          video.style.objectFit = "cover";
         }
       }
     };
@@ -148,7 +150,6 @@ export default function PatientForm() {
           className="border p-2 rounded-md mb-4 w-full"
         />
 
-       
         <div className="relative">
           <button
             onClick={() => setShowOptions(!showOptions)}
@@ -175,7 +176,6 @@ export default function PatientForm() {
           )}
         </div>
 
-       
         <input
           type="file"
           accept="image/*"
@@ -184,16 +184,19 @@ export default function PatientForm() {
           onChange={handleFileChange}
         />
 
-     
         {cameraOn && (
           <div className="mt-4 flex flex-col items-center gap-2">
-            <video
-              ref={videoRef}
-              autoPlay
-              playsInline
-              className="rounded-lg shadow-md w-full h-64 bg-black object-cover"
-            />
-            <div className="flex gap-4">
+            {/* 👇 Wrapper div for proper zoom */}
+            <div className="relative w-full h-64 overflow-hidden rounded-lg shadow-md bg-black">
+              <video
+                ref={videoRef}
+                autoPlay
+                playsInline
+                className="absolute top-0 left-0 w-full h-full object-cover"
+              />
+            </div>
+
+            <div className="flex gap-4 mt-2">
               <button
                 onClick={capturePhoto}
                 className="bg-green-600 text-white px-4 py-2 rounded-lg"
@@ -227,7 +230,6 @@ export default function PatientForm() {
           </div>
         )}
 
-        
         <canvas ref={canvasRef} className="hidden" />
       </div>
     </div>
