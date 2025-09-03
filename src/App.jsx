@@ -24,23 +24,28 @@ export default function PatientForm() {
     }
   };
 
-  const startCamera = async (mode = facingMode) => {
-    try {
-      if (stream) {
-        stream.getTracks().forEach((t) => t.stop());
-      }
-      const mediaStream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: mode },
-        audio: false,
-      });
-      setStream(mediaStream);
-      setCameraOn(true);
-      setShowOptions(false);
-      setFacingMode(mode);
-    } catch (err) {
-      console.error("Camera error:", err);
-    }
-  };
+  const startCamera = async (mode = "user") => {
+  try {
+    if (stream) stream.getTracks().forEach((t) => t.stop());
+
+    const constraints = {
+      video:
+        mode === "environment"
+          ? { facingMode: { exact: "environment" } }
+          : { facingMode: "user" },
+      audio: false,
+    };
+
+    const mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
+    setStream(mediaStream);
+    setCameraOn(true);
+    setFacingMode(mode);
+
+  } catch (err) {
+    console.error("Camera error:", err);
+    if (mode === "environment") startCamera("user"); // fallback to front camera
+  }
+};
 
   useEffect(() => {
     if (videoRef.current && stream) {
