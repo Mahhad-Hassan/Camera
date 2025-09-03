@@ -7,10 +7,12 @@ export default function PatientForm() {
   const [cameraOn, setCameraOn] = useState(false);
   const [stream, setStream] = useState(null);
   const [facingMode, setFacingMode] = useState("user");
+   const [zoomLevel, setZoomLevel] = useState(1);
 
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const fileInputRef = useRef(null);
+  const initialDistanceRef = useRef(null)
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
@@ -47,6 +49,64 @@ export default function PatientForm() {
       };
     }
   }, [stream]);
+
+    useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    const handleTouchStart = (e) => {
+      if (e.touches.length === 2) {
+        const dx = e.touches[0].clientX - e.touches[1].clientX;
+        const dy = e.touches[0].clientY - e.touches[1].clientY;
+        initialDistanceRef.current = Math.sqrt(dx * dx + dy * dy);
+      }
+    };
+
+    const handleTouchMove = async (e) => {
+      if (e.touches.length === 2 && initialDistanceRef.current) {
+        const dx = e.touches[0].clientX - e.touches[1].clientX;
+        const dy = e.touches[0].clientY - e.touches[1].clientY;
+        const newDistance = Math.sqrt(dx * dx + dy * dy);
+
+        let newZoom = zoomLevel * (newDistance / initialDistanceRef.current);
+        newZoom = Math.min(Math.max(newZoom, 1), 5); // zoom range: 1x - 5x
+
+        setZoomLevel(newZoom);
+        initialDistanceRef.current = newDistance;
+
+        // apply zoom to track (if supported)
+        const track = stream?.getVideoTracks()[0];
+        if (track && track.getCapabilities().zoom) {
+          try {
+            await track.applyConstraints({
+              advanced: [{ zoom: newZoom }],
+            });
+          } catch (err) {
+            console.warn("Zoom not supported:", err);
+          }
+        } else {
+          // fallback: CSS scale (agar hardware zoom supported na ho)
+          video.style.transform = `scale(${newZoom})`;
+        }
+      }
+    };
+
+    const handleTouchEnd = () => {
+      if (initialDistanceRef.current) {
+        initialDistanceRef.current = null;
+      }
+    };
+
+    video.addEventListener("touchstart", handleTouchStart);
+    video.addEventListener("touchmove", handleTouchMove);
+    video.addEventListener("touchend", handleTouchEnd);
+
+    return () => {
+      video.removeEventListener("touchstart", handleTouchStart);
+      video.removeEventListener("touchmove", handleTouchMove);
+      video.removeEventListener("touchend", handleTouchEnd);
+    };
+  }, [zoomLevel, stream]);
 
   const capturePhoto = () => {
     const video = videoRef.current;
@@ -88,7 +148,7 @@ export default function PatientForm() {
           className="border p-2 rounded-md mb-4 w-full"
         />
 
-        {/* Upload Button */}
+       
         <div className="relative">
           <button
             onClick={() => setShowOptions(!showOptions)}
