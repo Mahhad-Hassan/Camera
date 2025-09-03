@@ -1,10 +1,11 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 export default function PatientForm() {
   const [patientName, setPatientName] = useState("");
   const [showOptions, setShowOptions] = useState(false);
   const [preview, setPreview] = useState(null);
   const [cameraOn, setCameraOn] = useState(false);
+  const [stream, setStream] = useState(null);
 
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
@@ -20,24 +21,32 @@ export default function PatientForm() {
   };
 
  
-  const startCamera = async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: "user" }, 
-        audio: false,
-      });
 
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        await videoRef.current.play();
-      }
+const startCamera = async () => {
+  try {
+    const mediaStream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: "user" },
+      audio: false,
+    });
+    setStream(mediaStream);
+    setCameraOn(true);
+    setShowOptions(false);
+  } catch (err) {
+    console.error("Camera error:", err);
+  }
+};
 
-      setCameraOn(true);
-      setShowOptions(false);
-    } catch (err) {
-      console.error("Camera error:", err);
-    }
-  };
+
+useEffect(() => {
+  if (videoRef.current && stream) {
+    videoRef.current.srcObject = stream;
+    videoRef.current.onloadedmetadata = async () => {
+      await videoRef.current.play();
+    };
+  }
+}, [stream])
+
+
 
    const capturePhoto = () => {
     const video = videoRef.current;
