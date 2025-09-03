@@ -22,7 +22,7 @@ export default function PatientForm() {
 
  
 
-const startCamera = async (facingMode='user') => {
+const startCamera = async (facingMode) => {
   try {
     const mediaStream = await navigator.mediaDevices.getUserMedia({
       video: { facingMode },
@@ -114,7 +114,7 @@ useEffect(() => {
               </button>
               <button
                 onClick={() => startCamera("environment")}
-                className="w-full text-left px-4 py-2 hover:bg-gray-100 md:hidden"
+                className="w-full text-left px-4 py-2 hover:bg-gray-100 md:hidden "
               >
                 Capture from Back Camera
               </button>
