@@ -6,10 +6,11 @@ export default function PatientForm() {
   const [preview, setPreview] = useState(null);
   const [cameraOn, setCameraOn] = useState(false);
   const [stream, setStream] = useState(null);
+  const [facingMode, setFacingMode] = useState("user");
 
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
-
+  const fileInputRef = useRef(null);
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
@@ -20,35 +21,34 @@ export default function PatientForm() {
     }
   };
 
- 
+  const startCamera = async (mode = facingMode) => {
+    try {
+      if (stream) {
+        stream.getTracks().forEach((t) => t.stop());
+      }
+      const mediaStream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: mode },
+        audio: false,
+      });
+      setStream(mediaStream);
+      setCameraOn(true);
+      setShowOptions(false);
+      setFacingMode(mode);
+    } catch (err) {
+      console.error("Camera error:", err);
+    }
+  };
 
-const startCamera = async (facingMode) => {
-  try {
-    const mediaStream = await navigator.mediaDevices.getUserMedia({
-      video: { facingMode },
-      audio: false,
-    });
-    setStream(mediaStream);
-    setCameraOn(true);
-    setShowOptions(false);
-  } catch (err) {
-    console.error("Camera error:", err);
-  }
-};
+  useEffect(() => {
+    if (videoRef.current && stream) {
+      videoRef.current.srcObject = stream;
+      videoRef.current.onloadedmetadata = async () => {
+        await videoRef.current.play();
+      };
+    }
+  }, [stream]);
 
-
-useEffect(() => {
-  if (videoRef.current && stream) {
-    videoRef.current.srcObject = stream;
-    videoRef.current.onloadedmetadata = async () => {
-      await videoRef.current.play();
-    };
-  }
-}, [stream])
-
-
-
-   const capturePhoto = () => {
+  const capturePhoto = () => {
     const video = videoRef.current;
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d");
@@ -62,7 +62,6 @@ useEffect(() => {
     stopCamera();
   };
 
-
   const stopCamera = () => {
     const stream = videoRef.current?.srcObject;
     if (stream) {
@@ -71,12 +70,16 @@ useEffect(() => {
     setCameraOn(false);
   };
 
+  const switchCamera = () => {
+    const newMode = facingMode === "user" ? "environment" : "user";
+    startCamera(newMode);
+  };
+
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-100 p-6">
       <div className="bg-white shadow-lg rounded-2xl p-6 w-full max-w-md">
         <h2 className="text-2xl font-bold mb-4">Patient Form</h2>
 
-     
         <input
           type="text"
           placeholder="Enter patient name"
@@ -85,51 +88,49 @@ useEffect(() => {
           className="border p-2 rounded-md mb-4 w-full"
         />
 
-        
+        {/* Upload Button */}
         <div className="relative">
           <button
             onClick={() => setShowOptions(!showOptions)}
             className="bg-blue-600 text-white w-full py-2 rounded-lg"
           >
-            Upload
+            Upload / Capture
           </button>
 
-         
           {showOptions && (
-            <div className="absolute bg-white border rounded-lg shadow-md mt-2 w-full z-10">
-              <label className="block px-4 py-2 cursor-pointer hover:bg-gray-100">
-                Upload from Gallery
-                <input
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={handleFileChange}
-                />
-              </label>
+            <div className="absolute bg-white border rounded-lg shadow-lg mt-2 w-full z-10">
               <button
-                onClick={() => startCamera("user")}
-                className="w-full text-left px-4 py-2 hover:bg-gray-100"
+                onClick={() => fileInputRef.current.click()}
+                className="block w-full px-4 py-2 text-left hover:bg-gray-100"
               >
-                Capture from Front Camera
+                Upload from Media
               </button>
               <button
-                onClick={() => startCamera("environment")}
-                className="w-full text-left px-4 py-2 hover:bg-gray-100 md:hidden "
+                onClick={() => startCamera("user")}
+                className="block w-full px-4 py-2 text-left hover:bg-gray-100"
               >
-                Capture from Back Camera
+                Capture from Camera
               </button>
             </div>
           )}
         </div>
 
-        
+        {/* Hidden file input */}
+        <input
+          type="file"
+          accept="image/*"
+          ref={fileInputRef}
+          className="hidden"
+          onChange={handleFileChange}
+        />
+
+        {/* Camera Live Preview */}
         {cameraOn && (
           <div className="mt-4 flex flex-col items-center gap-2">
             <video
               ref={videoRef}
               autoPlay
               playsInline
-              muted
               className="rounded-lg shadow-md w-full h-64 bg-black object-cover"
             />
             <div className="flex gap-4">
@@ -138,6 +139,12 @@ useEffect(() => {
                 className="bg-green-600 text-white px-4 py-2 rounded-lg"
               >
                 Capture
+              </button>
+              <button
+                onClick={switchCamera}
+                className="bg-yellow-500 text-white px-4 py-2 rounded-lg md:hidden"
+              >
+                Switch Camera
               </button>
               <button
                 onClick={stopCamera}
@@ -149,7 +156,7 @@ useEffect(() => {
           </div>
         )}
 
-       
+        {/* Preview after capture */}
         {preview && (
           <div className="mt-4">
             <h3 className="font-semibold">Preview:</h3>
@@ -161,7 +168,7 @@ useEffect(() => {
           </div>
         )}
 
-       
+        {/* Hidden canvas */}
         <canvas ref={canvasRef} className="hidden" />
       </div>
     </div>
