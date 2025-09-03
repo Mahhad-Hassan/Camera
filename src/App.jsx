@@ -22,10 +22,10 @@ export default function PatientForm() {
 
  
 
-const startCamera = async () => {
+const startCamera = async (facingMode='user') => {
   try {
     const mediaStream = await navigator.mediaDevices.getUserMedia({
-      video: { facingMode: "user" },
+      video: { facingMode },
       audio: false,
     });
     setStream(mediaStream);
@@ -107,16 +107,22 @@ useEffect(() => {
                 />
               </label>
               <button
-                onClick={startCamera}
+                onClick={() => startCamera("user")}
                 className="w-full text-left px-4 py-2 hover:bg-gray-100"
               >
-                Capture from Camera
+                Capture from Front Camera
+              </button>
+              <button
+                onClick={() => startCamera("environment")}
+                className="w-full text-left px-4 py-2 hover:bg-gray-100 md:hidden"
+              >
+                Capture from Back Camera
               </button>
             </div>
           )}
         </div>
 
-        {/* Camera Live Preview */}
+        
         {cameraOn && (
           <div className="mt-4 flex flex-col items-center gap-2">
             <video
@@ -143,7 +149,7 @@ useEffect(() => {
           </div>
         )}
 
-        {/* Preview after capture */}
+       
         {preview && (
           <div className="mt-4">
             <h3 className="font-semibold">Preview:</h3>
@@ -155,7 +161,7 @@ useEffect(() => {
           </div>
         )}
 
-        {/* Hidden canvas */}
+       
         <canvas ref={canvasRef} className="hidden" />
       </div>
     </div>
