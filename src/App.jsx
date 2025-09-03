@@ -94,7 +94,7 @@ export default function PatientForm() {
             onClick={() => setShowOptions(!showOptions)}
             className="bg-blue-600 text-white w-full py-2 rounded-lg"
           >
-            Upload / Capture
+            Upload File
           </button>
 
           {showOptions && (
@@ -115,7 +115,7 @@ export default function PatientForm() {
           )}
         </div>
 
-        {/* Hidden file input */}
+       
         <input
           type="file"
           accept="image/*"
@@ -124,7 +124,7 @@ export default function PatientForm() {
           onChange={handleFileChange}
         />
 
-        {/* Camera Live Preview */}
+     
         {cameraOn && (
           <div className="mt-4 flex flex-col items-center gap-2">
             <video
@@ -156,7 +156,6 @@ export default function PatientForm() {
           </div>
         )}
 
-        {/* Preview after capture */}
         {preview && (
           <div className="mt-4">
             <h3 className="font-semibold">Preview:</h3>
@@ -168,7 +167,7 @@ export default function PatientForm() {
           </div>
         )}
 
-        {/* Hidden canvas */}
+        
         <canvas ref={canvasRef} className="hidden" />
       </div>
     </div>
