@@ -6,13 +6,21 @@ export default function PatientForm() {
   const [preview, setPreview] = useState(null);
   const [cameraOn, setCameraOn] = useState(false);
   const [stream, setStream] = useState(null);
-  const [facingMode, setFacingMode] = useState("user");
+  const [facingMode, setFacingMode] = useState("user"); // default user
   const [zoomLevel, setZoomLevel] = useState(1);
 
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const fileInputRef = useRef(null);
   const initialDistanceRef = useRef(null);
+
+  // ✅ Check screen size on mount
+  useEffect(() => {
+    if (window.innerWidth < 1024) {
+      // lg se chhoti screen
+      startCamera("environment"); // back camera open by default
+    }
+  }, []);
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
@@ -50,12 +58,13 @@ export default function PatientForm() {
     }
   }, [stream]);
 
+  // ✅ Zoom gesture handler (unchanged)
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
 
     const handleTouchStart = (e) => {
-      if (facingMode !== "environment") return; // ✅ zoom only for back camera
+      if (facingMode !== "environment") return;
       if (e.touches.length === 2) {
         e.preventDefault();
         const dx = e.touches[0].clientX - e.touches[1].clientX;
@@ -65,7 +74,7 @@ export default function PatientForm() {
     };
 
     const handleTouchMove = async (e) => {
-      if (facingMode !== "environment") return; // ✅ no zoom for front camera
+      if (facingMode !== "environment") return;
       if (e.touches.length === 2 && initialDistanceRef.current) {
         e.preventDefault();
         const dx = e.touches[0].clientX - e.touches[1].clientX;
@@ -139,8 +148,9 @@ export default function PatientForm() {
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gray-100 p-6">
-      <div className="bg-white shadow-lg rounded-2xl p-6 w-full max-w-md">
+    <div className="flex justify-center items-center min-h-screen bg-gray-100 p-0">
+      {/* ✅ full screen on small devices */}
+      <div className="bg-white shadow-lg rounded-none lg:rounded-2xl p-6 w-full h-full lg:max-w-md lg:h-auto">
         <h2 className="text-2xl font-bold mb-4">Patient Form</h2>
 
         <input
@@ -192,7 +202,7 @@ export default function PatientForm() {
               autoPlay
               playsInline
               className="rounded-lg shadow-md w-full h-64 bg-black object-cover"
-              style={{ touchAction: "none" }} // ✅ disable page zoom
+              style={{ touchAction: "none" }}
             />
             <div className="flex gap-4">
               <button
