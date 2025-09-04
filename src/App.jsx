@@ -191,7 +191,7 @@ export default function PatientForm() {
               ref={videoRef}
               autoPlay
               playsInline
-              className="rounded-lg shadow-md w-full h-[70vh] lg:h-96 bg-black object-cover"
+              className="rounded-lg shadow-md w-full h-[50vh] lg:h-96 bg-black object-cover"
               style={{ touchAction: "none" }}
             />
 
