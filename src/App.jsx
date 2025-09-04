@@ -6,7 +6,7 @@ export default function PatientForm() {
   const [preview, setPreview] = useState(null);
   const [cameraOn, setCameraOn] = useState(false);
   const [stream, setStream] = useState(null);
-  const [facingMode, setFacingMode] = useState("user"); // default user
+  const [facingMode, setFacingMode] = useState("user"); 
   const [zoomLevel, setZoomLevel] = useState(1);
 
   const videoRef = useRef(null);
@@ -14,11 +14,11 @@ export default function PatientForm() {
   const fileInputRef = useRef(null);
   const initialDistanceRef = useRef(null);
 
-  // ✅ Check screen size on mount
+ 
   useEffect(() => {
     if (window.innerWidth < 1024) {
-      // lg se chhoti screen
-      startCamera("environment"); // back camera open by default
+   
+      startCamera("environment"); 
     }
   }, []);
 
@@ -149,8 +149,8 @@ export default function PatientForm() {
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-100 p-0">
-      {/* ✅ full screen on small devices */}
-      <div className="bg-white shadow-lg rounded-none lg:rounded-2xl p-6 w-full h-full lg:max-w-md lg:h-auto">
+   
+      <div className="bg-white shadow-lg rounded-none lg:rounded-2xl p-6 w-full h-screen lg:max-w-md lg:h-auto">
         <h2 className="text-2xl font-bold mb-4">Patient Form</h2>
 
         <input
