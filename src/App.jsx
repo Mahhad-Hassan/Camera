@@ -295,6 +295,7 @@ export default function PatientForm() {
 
     const handleTouchStart = (e) => {
       if (e.touches.length === 2) {
+        e.preventDefault(); // ✅ page zoom disable
         const dx = e.touches[0].clientX - e.touches[1].clientX;
         const dy = e.touches[0].clientY - e.touches[1].clientY;
         initialDistanceRef.current = Math.sqrt(dx * dx + dy * dy);
@@ -303,12 +304,13 @@ export default function PatientForm() {
 
     const handleTouchMove = async (e) => {
       if (e.touches.length === 2 && initialDistanceRef.current) {
+        e.preventDefault(); // ✅ page zoom disable
         const dx = e.touches[0].clientX - e.touches[1].clientX;
         const dy = e.touches[0].clientY - e.touches[1].clientY;
         const newDistance = Math.sqrt(dx * dx + dy * dy);
 
         let newZoom = zoomLevel * (newDistance / initialDistanceRef.current);
-        newZoom = Math.min(Math.max(newZoom, 1), 5); // zoom range: 1x - 5x
+        newZoom = Math.min(Math.max(newZoom, 1), 5);
 
         setZoomLevel(newZoom);
         initialDistanceRef.current = newDistance;
@@ -334,8 +336,8 @@ export default function PatientForm() {
       }
     };
 
-    video.addEventListener("touchstart", handleTouchStart);
-    video.addEventListener("touchmove", handleTouchMove);
+    video.addEventListener("touchstart", handleTouchStart, { passive: false });
+    video.addEventListener("touchmove", handleTouchMove, { passive: false });
     video.addEventListener("touchend", handleTouchEnd);
 
     return () => {
@@ -426,58 +428,8 @@ export default function PatientForm() {
               autoPlay
               playsInline
               className="rounded-lg shadow-md w-full h-64 bg-black object-cover"
+              style={{ touchAction: "none" }} // ✅ page zoom disable
             />
-
-            {/* Zoom Buttons for Back Camera */}
-            {facingMode === "environment" && (
-              <div className="flex gap-2 mt-2">
-                <button
-                  onClick={async () => {
-                    let newZoom = Math.min(zoomLevel + 0.5, 5);
-                    setZoomLevel(newZoom);
-
-                    const track = stream?.getVideoTracks()[0];
-                    if (track && track.getCapabilities().zoom) {
-                      try {
-                        await track.applyConstraints({
-                          advanced: [{ zoom: newZoom }],
-                        });
-                      } catch (err) {
-                        console.warn("Zoom not supported:", err);
-                      }
-                    } else {
-                      videoRef.current.style.transform = `scale(${newZoom})`;
-                    }
-                  }}
-                  className="bg-blue-600 text-white px-3 py-1 rounded-lg"
-                >
-                  ➕ Zoom In
-                </button>
-
-                <button
-                  onClick={async () => {
-                    let newZoom = Math.max(zoomLevel - 0.5, 1);
-                    setZoomLevel(newZoom);
-
-                    const track = stream?.getVideoTracks()[0];
-                    if (track && track.getCapabilities().zoom) {
-                      try {
-                        await track.applyConstraints({
-                          advanced: [{ zoom: newZoom }],
-                        });
-                      } catch (err) {
-                        console.warn("Zoom not supported:", err);
-                      }
-                    } else {
-                      videoRef.current.style.transform = `scale(${newZoom})`;
-                    }
-                  }}
-                  className="bg-blue-600 text-white px-3 py-1 rounded-lg"
-                >
-                  ➖ Zoom Out
-                </button>
-              </div>
-            )}
 
             <div className="flex gap-4 mt-2">
               <button
