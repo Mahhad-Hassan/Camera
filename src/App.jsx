@@ -58,7 +58,7 @@ export default function PatientForm() {
     }
   }, [stream]);
 
-  // ✅ Zoom gesture handler (unchanged)
+  
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
@@ -178,11 +178,12 @@ export default function PatientForm() {
                 Upload from Media
               </button>
               <button
-                onClick={() => startCamera("user")}
-                className="block w-full px-4 py-2 text-left hover:bg-gray-100"
-              >
-                Capture from Camera
+                  onClick={() => startCamera("environment")}   // 👈 sidha back camera
+                  className="block w-full px-4 py-2 text-left hover:bg-gray-100"
+                  >
+               Capture from Camera
               </button>
+
             </div>
           )}
         </div>
@@ -197,13 +198,14 @@ export default function PatientForm() {
 
         {cameraOn && (
           <div className="mt-4 flex flex-col items-center gap-2">
-            <video
-              ref={videoRef}
-              autoPlay
-              playsInline
-              className="rounded-lg shadow-md w-full h-64 bg-black object-cover"
-              style={{ touchAction: "none" }}
+           <video
+             ref={videoRef}
+             autoPlay
+             playsInline
+             className="rounded-lg shadow-md w-full h-64 sm:h-80 md:h-[500px] lg:h-64 bg-black object-cover"
+             style={{ touchAction: "none" }}
             />
+
             <div className="flex gap-4">
               <button
                 onClick={capturePhoto}
