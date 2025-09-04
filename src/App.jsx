@@ -6,13 +6,18 @@ export default function PatientForm() {
   const [preview, setPreview] = useState(null);
   const [cameraOn, setCameraOn] = useState(false);
   const [stream, setStream] = useState(null);
-  const [facingMode, setFacingMode] = useState("user"); 
+  const [facingMode, setFacingMode] = useState("user");
   const [zoomLevel, setZoomLevel] = useState(1);
+  const [uploading, setUploading] = useState(false);
 
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const fileInputRef = useRef(null);
   const initialDistanceRef = useRef(null);
+
+  // Cloudinary config
+  const CLOUD_NAME = "dugrzv8ja";
+  const UPLOAD_PRESET = "patient_preset";
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
@@ -138,6 +143,56 @@ export default function PatientForm() {
     startCamera(newMode);
   };
 
+  const uploadToCloudinary = async () => {
+    if (!preview || !patientName) {
+      alert("Please enter patient name and select/capture a photo.");
+      return;
+    }
+
+    try {
+      setUploading(true);
+
+      let file;
+      if (preview.startsWith("data:image")) {
+        // DataURL (camera capture)
+        const blob = await fetch(preview).then((res) => res.blob());
+        file = new File([blob], "capture.png", { type: "image/png" });
+      } else {
+        // File URL (media upload)
+        file = await fetch(preview).then((res) => res.blob());
+      }
+
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("upload_preset", UPLOAD_PRESET);
+      formData.append("folder", "patients");
+
+      const response = await fetch(
+        `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`,
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
+
+      const data = await response.json();
+      console.log("Uploaded:", { name: patientName, url: data.secure_url });
+      alert("Upload successful ✅");
+
+      // ✅ Reset form
+      setPatientName("");
+      setPreview(null);
+      setShowOptions(false);
+      setCameraOn(false);
+
+      setUploading(false);
+    } catch (err) {
+      console.error("Upload error:", err);
+      alert("Upload failed ❌");
+      setUploading(false);
+    }
+  };
+
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-100 p-0">
       <div className="bg-white shadow-lg rounded-none lg:rounded-2xl p-6 w-full h-screen lg:max-w-md lg:h-auto">
@@ -168,7 +223,7 @@ export default function PatientForm() {
                 Upload from Media
               </button>
               <button
-                onClick={() => startCamera("environment")} // 👈 sirf button pe back camera open
+                onClick={() => startCamera("environment")} // 👈 back camera
                 className="block w-full px-4 py-2 text-left hover:bg-gray-100"
               >
                 Capture from Camera
@@ -226,6 +281,13 @@ export default function PatientForm() {
               alt="Preview"
               className="mt-2 w-full h-64 object-cover rounded-lg shadow-md"
             />
+            <button
+              onClick={uploadToCloudinary}
+              disabled={uploading}
+              className="mt-3 bg-purple-600 text-white w-full py-2 rounded-lg disabled:opacity-50"
+            >
+              {uploading ? "Uploading..." : "Upload to Cloudinary"}
+            </button>
           </div>
         )}
 
