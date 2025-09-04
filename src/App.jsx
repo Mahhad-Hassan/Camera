@@ -14,14 +14,6 @@ export default function PatientForm() {
   const fileInputRef = useRef(null);
   const initialDistanceRef = useRef(null);
 
- 
-  useEffect(() => {
-    if (window.innerWidth < 1024) {
-   
-      startCamera("environment"); 
-    }
-  }, []);
-
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -58,7 +50,6 @@ export default function PatientForm() {
     }
   }, [stream]);
 
-  
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
@@ -149,7 +140,6 @@ export default function PatientForm() {
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-100 p-0">
-   
       <div className="bg-white shadow-lg rounded-none lg:rounded-2xl p-6 w-full h-screen lg:max-w-md lg:h-auto">
         <h2 className="text-2xl font-bold mb-4">Patient Form</h2>
 
@@ -178,12 +168,11 @@ export default function PatientForm() {
                 Upload from Media
               </button>
               <button
-                  onClick={() => startCamera("environment")}   // 👈 sidha back camera
-                  className="block w-full px-4 py-2 text-left hover:bg-gray-100"
-                  >
-               Capture from Camera
+                onClick={() => startCamera("environment")} // 👈 sirf button pe back camera open
+                className="block w-full px-4 py-2 text-left hover:bg-gray-100"
+              >
+                Capture from Camera
               </button>
-
             </div>
           )}
         </div>
@@ -198,12 +187,12 @@ export default function PatientForm() {
 
         {cameraOn && (
           <div className="mt-4 flex flex-col items-center gap-2">
-           <video
-             ref={videoRef}
-             autoPlay
-             playsInline
-             className="rounded-lg shadow-md w-full h-64 sm:h-80 md:h-[500px] lg:h-64 bg-black object-cover"
-             style={{ touchAction: "none" }}
+            <video
+              ref={videoRef}
+              autoPlay
+              playsInline
+              className="rounded-lg shadow-md w-full h-[70vh] lg:h-96 bg-black object-cover"
+              style={{ touchAction: "none" }}
             />
 
             <div className="flex gap-4">
