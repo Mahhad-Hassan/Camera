@@ -3,11 +3,12 @@ import Tesseract from "tesseract.js";
 import PatientInput from "./PatientInput";
 import CameraView from "./CameraView";
 import PreviewImage from "./PreviewImage";
-import {UploadOptions} from './Upload'
+
 import uploadToCloudinary from "../Utils/CloudinaryUpload";
 import MedicineName from "./MedicineName";
 import MedicineQuantity from "./MedicineQuantity";
 import MedicineSchedule from "./MedicineSchedule";
+import UploadOptions from "./Uploadoptions";
 
 export default function PatientForm() {
   const [patientName, setPatientName] = useState("");
