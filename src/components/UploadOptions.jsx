@@ -7,7 +7,7 @@ export default function UploadOptions({ setShowOptions, showOptions, fileInputRe
         onClick={() => setShowOptions(!showOptions)}
         className="bg-blue-600 text-white w-full py-2 rounded-lg"
       >
-        Upload File
+        Upload Files
       </button>
 
       {showOptions && (
