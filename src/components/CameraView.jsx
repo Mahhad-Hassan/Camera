@@ -8,7 +8,7 @@ export default function CameraView({ videoRef, capturePhoto, stopCamera }) {
         autoPlay
         playsInline
         className="rounded-lg shadow-md w-full h-[50vh] lg:h-96 bg-black object-cover"
-        style={{ touchAction: "none" }}
+         style={{ touchAction: "manipulation" }} 
       />
 
       <div className="flex gap-4">
