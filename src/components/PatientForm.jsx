@@ -3,7 +3,7 @@ import Tesseract from "tesseract.js";
 import PatientInput from "./PatientInput";
 import CameraView from "./CameraView";
 import PreviewImage from "./PreviewImage";
-import UploadOptions from "./Uploadoptions";
+import {UploadOptions} from './Upload'
 import uploadToCloudinary from "../Utils/CloudinaryUpload";
 import MedicineName from "./MedicineName";
 import MedicineQuantity from "./MedicineQuantity";
