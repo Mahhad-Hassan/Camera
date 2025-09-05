@@ -1,6 +1,6 @@
 import React from "react";
 
-export default function CameraView({ videoRef, capturePhoto, switchCamera, stopCamera }) {
+export default function CameraView({ videoRef, capturePhoto, stopCamera }) {
   return (
     <div className="mt-4 flex flex-col items-center gap-2">
       <video
@@ -16,13 +16,7 @@ export default function CameraView({ videoRef, capturePhoto, switchCamera, stopC
           onClick={capturePhoto}
           className="bg-green-600 text-white px-4 py-2 rounded-lg"
         >
-          Capture
-        </button>
-        <button
-          onClick={switchCamera}
-          className="bg-yellow-500 text-white px-4 py-2 rounded-lg md:hidden"
-        >
-          Switch Camera
+          Scan Paper
         </button>
         <button
           onClick={stopCamera}
