@@ -1,14 +1,15 @@
 import React, { useEffect, useRef, useState } from "react";
 
-export default function CameraView({ videoRef, capturePhoto, stopCamera, stream }) {
+export default function CameraView({ videoRef, capturePhoto, stopCamera, switchCamera, stream }) {
   const initialDistanceRef = useRef(null);
   const [zoomLevel, setZoomLevel] = useState(1);
 
+  // 🔍 Pinch Zoom Handling
   useEffect(() => {
     if (!stream) return;
 
     const track = stream.getVideoTracks()[0];
-    const capabilities = track.getCapabilities();
+    const capabilities = track?.getCapabilities();
 
     const handleTouchMove = async (e) => {
       if (e.touches.length === 2 && initialDistanceRef.current) {
@@ -24,7 +25,7 @@ export default function CameraView({ videoRef, capturePhoto, stopCamera, stream 
         setZoomLevel(newZoom);
         initialDistanceRef.current = newDistance;
 
-        if (track && capabilities.zoom) {
+        if (track && capabilities?.zoom) {
           try {
             await track.applyConstraints({
               advanced: [{ zoom: newZoom }],
@@ -47,12 +48,16 @@ export default function CameraView({ videoRef, capturePhoto, stopCamera, stream 
     };
 
     const videoEl = videoRef.current;
-    videoEl.addEventListener("touchstart", handleTouchStart, { passive: false });
-    videoEl.addEventListener("touchmove", handleTouchMove, { passive: false });
+    if (videoEl) {
+      videoEl.addEventListener("touchstart", handleTouchStart, { passive: false });
+      videoEl.addEventListener("touchmove", handleTouchMove, { passive: false });
+    }
 
     return () => {
-      videoEl.removeEventListener("touchstart", handleTouchStart);
-      videoEl.removeEventListener("touchmove", handleTouchMove);
+      if (videoEl) {
+        videoEl.removeEventListener("touchstart", handleTouchStart);
+        videoEl.removeEventListener("touchmove", handleTouchMove);
+      }
     };
   }, [stream, videoRef, zoomLevel]);
 
@@ -66,7 +71,7 @@ export default function CameraView({ videoRef, capturePhoto, stopCamera, stream 
         style={{ touchAction: "none" }}
       />
 
-      <div className="flex gap-4">
+      <div className="flex gap-4 flex-wrap justify-center">
         <button
           onClick={capturePhoto}
           className="bg-green-600 text-white px-4 py-2 rounded-lg"
@@ -78,6 +83,12 @@ export default function CameraView({ videoRef, capturePhoto, stopCamera, stream 
           className="bg-red-500 text-white px-4 py-2 rounded-lg"
         >
           Cancel
+        </button>
+        <button
+          onClick={switchCamera}
+          className="bg-blue-600 text-white px-4 py-2 rounded-lg"
+        >
+          Switch Camera
         </button>
       </div>
     </div>

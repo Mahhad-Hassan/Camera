@@ -5,12 +5,10 @@ import CameraView from "./CameraView";
 import PreviewImage from "./PreviewImage";
 import UploadOptions from "./UploadOptions";
 
-
 import uploadToCloudinary from "../Utils/CloudinaryUpload";
 import MedicineName from "./MedicineName";
 import MedicineQuantity from "./MedicineQuantity";
 import MedicineSchedule from "./MedicineSchedule";
-
 
 export default function PatientForm() {
   const [patientName, setPatientName] = useState("");
@@ -21,6 +19,7 @@ export default function PatientForm() {
   const [preview, setPreview] = useState(null);
   const [cameraOn, setCameraOn] = useState(false);
   const [stream, setStream] = useState(null);
+  const [facingMode, setFacingMode] = useState("environment"); // back camera default
   const [uploading, setUploading] = useState(false);
 
   const videoRef = useRef(null);
@@ -39,14 +38,17 @@ export default function PatientForm() {
   };
 
   // 📌 Camera Functions
-  const startCamera = async () => {
+  const startCamera = async (mode = facingMode) => {
     try {
       if (stream) stream.getTracks().forEach((t) => t.stop());
+
       const mediaStream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: "environment" }, // always back camera
+        video: { facingMode: mode },
         audio: false,
       });
+
       setStream(mediaStream);
+      setFacingMode(mode);
       setCameraOn(true);
       setShowOptions(false);
     } catch (err) {
@@ -82,10 +84,13 @@ export default function PatientForm() {
     const streamObj = videoRef.current?.srcObject;
     if (streamObj) streamObj.getTracks().forEach((t) => t.stop());
     setCameraOn(false);
+    setStream(null);
   };
 
-  const switchCamera = () => {
-    // Optional: For scanning, we usually keep back camera
+  const switchCamera = async () => {
+    const newMode = facingMode === "environment" ? "user" : "environment";
+    stopCamera();
+    await startCamera(newMode);
   };
 
   const handleUpload = () =>
@@ -107,7 +112,6 @@ export default function PatientForm() {
       });
       const lines = data.text.split("\n").map((l) => l.trim()).filter(Boolean);
 
-      // Example simple mapping (adjust based on your paper format)
       setPatientName(lines[0] || "");
       setMedicineName(lines[1] || "");
       setMedicineQuantity(lines[2] || "");
@@ -146,8 +150,10 @@ export default function PatientForm() {
           <CameraView
             videoRef={videoRef}
             capturePhoto={capturePhoto}
-            switchCamera={switchCamera}
             stopCamera={stopCamera}
+            switchCamera={switchCamera}
+            stream={stream}
+            facingMode={facingMode}
           />
         )}
 
